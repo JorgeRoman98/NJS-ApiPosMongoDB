@@ -65,11 +65,15 @@ const collectionName = "MOVIL_POSICION_4K";
 const database = client.db(dbName);
 const collection = database.collection(collectionName);
 
+BigInt.prototype.toJSON = function () {
+  const int = Number.parseInt(this.toString());
+  return int ?? this.toString();
+};
 
 router.post('/insert', async (req, res) => {
     try{
         const newPos = req.body
-        newPos.fecha_hora = new Date(newPos.fecha_hora + '-03:00')
+        newPos.fecha_hora = new Date(newPos.fecha_hora + 'Z')
         const insertResult = await collection.insertOne(newPos)
         console.log(insertResult)
         res.status(201).json({ message: 'Objeto almacenado' });
@@ -103,8 +107,9 @@ router.post('/insert', async (req, res) => {
 router.get('/one/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const cursor = await collection.find({ patente : { $lt: 'WISE-12' } }).sort({ patente: 1 });
+    const cursor = await collection.find({ patente : 'WISE-12' }, { sort: { patente: 1 }});
     
+    console.log(cursor)
     res.status(200).json(cursor);
 
   } catch (err) {
@@ -124,8 +129,9 @@ router.get('/one/:id', async (req, res) => {
 
 router.get('/all', async (_req, res) => {
     try {
-      const cursor = await collection.find().sort({ patente: 1 });;
+      const cursor = await collection.find().toArray();
       console.log(cursor)
+      //await cursor.forEach(console.dir);
       res.status(200).json(cursor);
     } catch (err) {
       res.status(500).json({ message: 'Error al obtener los objetos', error: err.message });
