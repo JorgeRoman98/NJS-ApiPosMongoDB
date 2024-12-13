@@ -1,11 +1,13 @@
 const express = require('express');
+const myParser = require("body-parser");
 const { swaggerDocs, swaggerUi } = require('./swagger');
 
 
 const app = express();
 const port = 5000;
 
-app.use(express.json())
+app.use(myParser.json({limit: '200mb'}));
+app.use(myParser.urlencoded({limit: '200mb', extended: true}));
 
 app.use('/api-docs',swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
