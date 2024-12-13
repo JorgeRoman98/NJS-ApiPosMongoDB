@@ -70,12 +70,20 @@ BigInt.prototype.toJSON = function () {
   return int ?? this.toString();
 };
 
+router.get('/', async (req, res) => {
+  res.status(201).json({ message : 'OK'})
+})
+
 router.post('/insert', async (req, res) => {
     try{
         const newPos = req.body
         newPos.fecha_hora = new Date(newPos.fecha_hora + 'Z')
-        const insertResult = await collection.insertOne(newPos)
-        console.log(insertResult)
+
+        newPos.forEach(element => {
+          element.fecha_hora = new Date(element.fecha_hora + 'Z')
+        });
+        const insertResult = await collection.insertMany(newPos)
+        
         res.status(201).json({ message: 'Objeto almacenado' });
 
     }catch(err){
